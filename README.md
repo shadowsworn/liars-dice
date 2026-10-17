@@ -44,9 +44,21 @@ Pick Easy, Medium or Hard under New game (Hard is the default). On Hard, opponen
 ## How the coach works
 
 - `js/solver.js` enumerates all 7,776 possible hands, so the odds for any bid are exact.
-- It also "reads" the table: each opponent's hidden hand is re-weighted by how likely a typical player would be to make the bids they made.
-- Every option is scored by your **chance of drinking this round**. Opening: the chance the bid is true. Raising: the chance the next player opens you and your bid is false, plus a small leftover risk if they raise instead.
+- It "reads" the table: each opponent's hidden hand is re-weighted by how likely a player would be to make the bids they made.
+- Every option is scored by your **chance of drinking this round**. Opening: the chance the bid is true.
+- Raising, at 3+ players: it simulates the next player. For each count of the face they might hold, it works out what they would believe and how likely they are to open, and whether your bid would be false in that case. If they raise instead, a leftover risk (measured in self-play) covers the rest of the round.
+- Raising, 1 on 1: a simpler outside view (the less believable your bid looks, the more often you get opened) tested stronger head-to-head.
 - Moves are graded by how much drink risk you added over the best option: Great move, Good, Not quite, Mistake, Big mistake.
+
+### Self-play calibration
+
+The read strength, when players open, and the leftover risk come from self-play rather than guesses (`js/params.js`):
+
+```bash
+sh tools/calibrate.sh 15000 3
+```
+
+This plays hard bots against each other at 3–6 players, fits the parameters, and repeats so bots and coach settle on matching values. In head-to-head tests the calibrated engine drank less than the previous version at every table size (for example 0.227 vs 0.273 drinks per round at 4 players), and the same at 6.
 
 ## Files
 
@@ -54,6 +66,8 @@ Pick Easy, Medium or Hard under New game (Hard is the default). On Hard, opponen
 - `css/style.css` look and animations
 - `js/rules.js` counting and bid legality
 - `js/solver.js` odds engine and advisor
+- `js/params.js` calibrated parameters (generated)
+- `tools/` self-play calibration scripts
 - `js/ai.js` opponent personalities
 - `js/sound.js` synthesized dice sounds
 - `js/app.js` game flow, cup peeking, coach cards, summary

@@ -78,7 +78,9 @@
       s += gauss() * noise;
       if (s > bs) { bs = s; best = o; }
     }
-    return best.type === 'open' ? { type: 'open' } : { type: 'bid', bid: best.bid };
+    // pFacing (how likely the bot thought the bid in front of it was) is used by the calibration script.
+    const pFacing = A.open ? A.open.pTrue : null;
+    return best.type === 'open' ? { type: 'open', pFacing } : { type: 'bid', bid: best.bid, pFacing };
   }
 
   LD.AI = { PERSONAS, LEVELS, decide };
