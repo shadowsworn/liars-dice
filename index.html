@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liar's Dice Dojo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Train for 大话骰 (Asian liar dice) against hidden-personality opponents, with a coach that grades every move.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Ma+Shan+Zheng&family=Young+Serif&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="cupBody" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#3f070c"/>
+      <stop offset="0.18" stop-color="#8e1520"/>
+      <stop offset="0.36" stop-color="#d23a43"/>
+      <stop offset="0.5" stop-color="#b0202b"/>
+      <stop offset="0.82" stop-color="#6d0f17"/>
+      <stop offset="1" stop-color="#33060a"/>
+    </linearGradient>
+    <linearGradient id="cupTop" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#e2626a"/>
+      <stop offset="1" stop-color="#8e1520"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#7a5418"/>
+      <stop offset="0.35" stop-color="#f3cf7a"/>
+      <stop offset="0.55" stop-color="#d9a54a"/>
+      <stop offset="1" stop-color="#6b4712"/>
+    </linearGradient>
+    <radialGradient id="dieFace" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="0.7" stop-color="#f1e7cf"/>
+      <stop offset="1" stop-color="#d9caa6"/>
+    </radialGradient>
+    <symbol id="cupArt" viewBox="0 0 200 210">
+      <path d="M14 182 L40 44 Q100 6 160 44 L186 182 Q100 206 14 182 Z" fill="url(#cupBody)"/>
+      <path d="M40 44 Q100 6 160 44 Q100 30 40 44 Z" fill="url(#cupTop)"/>
+      <path d="M38 58 Q100 40 162 58" stroke="url(#brass)" stroke-width="3.5" fill="none"/>
+      <path d="M36 68 Q100 51 164 68" stroke="url(#brass)" stroke-width="1.4" fill="none" opacity=".75"/>
+      <path d="M58 70 Q64 122 48 170" stroke="#ffffff" stroke-opacity=".16" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <circle cx="104" cy="118" r="25" fill="url(#brass)"/>
+      <circle cx="104" cy="118" r="20" fill="none" stroke="#5e0d14" stroke-width="1.5"/>
+      <text x="104" y="129" text-anchor="middle" font-family="'Ma Shan Zheng','Kaiti SC','STKaiti',serif" font-size="30" fill="#5e0d14">骰</text>
+      <path d="M17 166 Q100 190 183 166 L186 182 Q100 206 14 182 Z" fill="url(#brass)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-cn" aria-hidden="true">大话骰</span>
+      <span class="brand-en">Liar's Dice Dojo</span>
+    </div>
+    <div class="round-pill" id="roundPill">Round 1 of 10</div>
+    <div class="top-actions">
+      <label class="switch" title="Coach feedback after every move">
+        <input type="checkbox" id="learnToggle">
+        <span class="switch-track" aria-hidden="true"></span>
+        <span>Learning mode</span>
+      </label>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound">♪</button>
+      <button class="ghost-btn" id="rulesBtn" type="button">Rules</button>
+      <button class="ghost-btn" id="newGameBtn" type="button">New game</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="table" id="table" aria-label="Table">
+      <div class="opponents" id="opponents"></div>
+
+      <div class="center" id="center">
+        <div class="plaque" id="plaque"></div>
+        <ol class="history" id="history" aria-label="Bids this round"></ol>
+      </div>
+
+      <div class="me" id="mySeat">
+        <div class="me-left">
+          <div class="seat-head me-head">
+            <div class="avatar" style="--seat:#ece4d2">You</div>
+            <div>
+              <div class="seat-name">You</div>
+              <div class="drinks" id="myDrinks"></div>
+            </div>
+          </div>
+          <div class="tray-wrap big">
+            <div class="tray" id="myTray">
+              <div class="saucer"></div>
+              <div class="dice-cluster" id="myDice"></div>
+              <div class="cup-shadow"></div>
+              <div class="cup" id="myCup" role="button" tabindex="0" aria-label="Your dice cup. Drag up, tap, or hold Space to peek.">
+                <svg viewBox="0 0 200 210" aria-hidden="true"><use href="#cupArt"/></svg>
+              </div>
+            </div>
+            <div class="bubble me-bubble" id="myBubble"></div>
+          </div>
+          <p class="peek-hint" id="peekHint">Drag the cup up to peek · tap or hold Space</p>
+        </div>
+
+        <div class="controls" id="controls">
+          <div class="ctl-status" id="ctlStatus"></div>
+          <div class="ctl-row">
+            <div class="ctl-group">
+              <span class="ctl-label">How many</span>
+              <div class="stepper">
+                <button type="button" id="qtyDown" aria-label="Fewer">−</button>
+                <output id="qtyOut">5</output>
+                <button type="button" id="qtyUp" aria-label="More">+</button>
+              </div>
+            </div>
+            <div class="ctl-group">
+              <span class="ctl-label">Face</span>
+              <div class="faces" id="faces" role="radiogroup" aria-label="Face"></div>
+            </div>
+            <div class="ctl-group">
+              <span class="ctl-label">Mode</span>
+              <div class="mode" role="radiogroup" aria-label="Mode">
+                <button type="button" id="modeFly" role="radio"><span class="cn">飞</span> Fly</button>
+                <button type="button" id="modeZai" role="radio"><span class="cn">斋</span> Zai</button>
+              </div>
+            </div>
+          </div>
+          <div class="ctl-row actions">
+            <button type="button" class="btn bid-btn" id="bidBtn">Bid</button>
+            <button type="button" class="btn open-btn" id="openBtn"><span class="cn">开</span> Open</button>
+            <button type="button" class="btn hint-btn" id="hintBtn">Coach hint</button>
+            <button type="button" class="btn hint-btn" id="cheatBtn">Cheat sheet</button>
+          </div>
+          <div class="hint-box" id="hintBox" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side" aria-label="Coach and table talk">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tabCoach" aria-selected="true">Coach</button>
+        <button type="button" role="tab" id="tabLog" aria-selected="false">Table talk</button>
+      </div>
+      <div class="feed" id="coachFeed"></div>
+      <div class="feed" id="logFeed" hidden></div>
+    </aside>
+  </main>
+</div>
+
+<div class="stamp" id="stamp" aria-hidden="true">开</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div>
+</div>
+
+<script src="js/rules.js"></script>
+<script src="js/solver.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
